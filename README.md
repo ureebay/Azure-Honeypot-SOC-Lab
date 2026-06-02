@@ -1,8 +1,5 @@
 # Azure Honeypot & SOC Lab
  
-> How fast does an exposed machine get attacked on the public internet? Turns out, minutes.
- 
----
  
 ## The Problem This Solves
  
