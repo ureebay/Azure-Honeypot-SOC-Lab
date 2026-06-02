@@ -22,6 +22,7 @@ A fully functional cloud-based Security Operations Center using Microsoft Azure,
 
 ## Architecture
 
+```
 Internet Attackers
        ↓
 FINCORP-NET-EAST-1 (Windows 10 Honeypot VM — publicly exposed, firewalls off)
@@ -35,6 +36,7 @@ Microsoft Sentinel (SIEM — querying, enrichment, visualization)
 GeoIP Watchlist (maps attacker IPs to real-world locations)
        ↓
 Live Attack Map (Sentinel Workbook — plots every attacker on a world map)
+```
 
 ---
 
@@ -104,12 +106,16 @@ Connected Microsoft Sentinel to the Log Analytics Workspace, installed the Windo
 ### 9. Query Incoming Attack Logs with KQL
 Once logs started flowing in, KQL was used to filter and inspect the attack traffic. Event ID 4625 is the key indicator — it fires every time someone fails to log in.
 
+```kql
 SecurityEvent
 | project TimeGenerated, Account, Computer, EventID, Activity, IpAddress
+```
 
+```kql
 SecurityEvent
 | where EventID == 4625
 | project TimeGenerated, Account, Computer, IpAddress, Activity
+```
 
 ![Query Security](images/Query-Security.png)
 
@@ -123,14 +129,17 @@ SecurityEvent
 ### 10. Upload the GeoIP Watchlist
 Created a Sentinel watchlist named `geoip` containing approximately 55,000 records that map IP address network blocks to physical locations including city, country, latitude, and longitude. This is what allows the SIEM to turn a raw IP address into a point on a map.
 
+```kql
 _GetWatchlist("geoip")
 | take 5
+```
 
 ![GeoIP Added](images/GeoIP_Added.png)
 
 ### 11. Enrich Attack Logs with Location Data
 Used the `ipv4_lookup` function to join each attacker IP address against the GeoIP watchlist, resolving every failed login to a real-world city and country.
 
+```kql
 let GeoIPDB_FULL = _GetWatchlist("geoip");
 let WindowsEvents = SecurityEvent
     | where EventID == 4625
@@ -138,6 +147,7 @@ let WindowsEvents = SecurityEvent
     | evaluate ipv4_lookup(GeoIPDB_FULL, IpAddress, network);
 WindowsEvents
 | project TimeGenerated, Computer, AttackerIp = IpAddress, cityname, countryname, latitude, longitude
+```
 
 ![Attacker IP](images/AttackerIP.png)
 
@@ -146,13 +156,17 @@ Within hours the logs showed sustained brute-force activity from Tambov, Russia 
 ### 12. Build the Live Attack Map
 Created a Sentinel Workbook that aggregates all failed logins by location and renders them as a heatmap on a world map. Bubble size represents attack volume. The map updates automatically as new attacks arrive.
 
+```kql
 let GeoIPDB_FULL = _GetWatchlist("geoip");
 let WindowsEvents = SecurityEvent;
 WindowsEvents | where EventID == 4625
 | order by TimeGenerated desc
 | evaluate ipv4_lookup(GeoIPDB_FULL, IpAddress, network)
 | summarize FailureCount = count() by IpAddress, latitude, longitude, cityname, countryname
-| project FailureCount, AttackerIp = IpAddress, latitude, longitude, city = cityname, country = countryname, friendly_location = strcat(cityname, " (", countryname, ")")
+| project FailureCount, AttackerIp = IpAddress, latitude, longitude,
+  city = cityname, country = countryname,
+  friendly_location = strcat(cityname, " (", countryname, ")")
+```
 
 ---
 
