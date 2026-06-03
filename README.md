@@ -208,7 +208,7 @@ The takeaway is not that any one country is uniquely dangerous. It is that any m
 
 ---
 
-## 🎯 Skills Demonstrated
+## Skills Demonstrated
 
 - Microsoft Azure (resource groups, virtual networks, VMs, NSGs, public IP management)
 - Microsoft Sentinel (SIEM deployment, data connectors, watchlists, workbooks)
