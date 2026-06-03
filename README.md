@@ -1,4 +1,8 @@
+# Azure Honeypot & SOC Lab
 
+> How fast does an exposed machine get attacked on the public internet? Turns out, minutes.
+
+---
 
 ## The Problem This Solves
 
@@ -147,8 +151,6 @@ WindowsEvents
 
 ![Attacker IP](images/AttackerIP.png)
 
-Within hours the logs showed sustained brute-force activity from Tambov, Russia — a single IP responsible for 248 failed login attempts, hammering the machine roughly every two minutes around the clock.
-
 ### 12. Build the Live Attack Map
 Created a Sentinel Workbook that aggregates all failed logins by location and renders them as a heatmap on a world map. Bubble size represents attack volume. The map updates automatically as new attacks arrive.
 
@@ -166,23 +168,44 @@ WindowsEvents | where EventID == 4625
 
 ---
 
-## Attack Map
+## Attack Map — Results After 24 Hours
 
-Map will be updated after 24 hours of continuous operation.
+After leaving the honeypot running for 24 hours, the machine received over 130,000 real failed login attempts from threat actors and automated bots spanning every continent. The map below shows exactly where the attacks originated.
+
+![Attack Map 24 Hours](images/Attack-Map-24hr.png)
+
+| Location | Failed Login Attempts |
+|----------|----------------------|
+| Bicester, United Kingdom | 33,100 |
+| Goyang-si, South Korea | 24,800 |
+| Maam, Netherlands | 24,300 |
+| Townsville, Australia | 22,800 |
+| Other | 8,770 |
+| Perth, Australia | 3,450 |
+| Auckland, New Zealand | 3,440 |
+| Makati City, Philippines | 3,400 |
+| Busan, South Korea | 2,750 |
+| United States | 2,480 |
+
+**Total: 130,290+ failed login attempts in under 24 hours.**
+
+The machine was never advertised, listed, or announced anywhere. It was found purely by automated scanners constantly sweeping the internet for exposed machines. The UK being the top source likely indicates a network of compromised servers being used as proxies rather than attacks originating from UK-based threat actors directly.
+
+This is the baseline threat level facing any internet-connected machine with an open port and no protection.
 
 ---
 
 ## What the Data Showed
 
-The machine was attacked within minutes of going live. No announcements, no exposure beyond a public IP address — just automated scanners doing what they always do.
-
-- Within the first few hours: 248 failed login attempts from Tambov, Russia alone
+- The VM was discovered and attacked within minutes of going live
+- Over 130,000 failed login attempts recorded in under 24 hours
+- Attacks originated from every major continent simultaneously
 - Attackers cycled through common usernames like administrator, admin, and user
-- Attack attempts arrived roughly every 1 to 2 minutes from the primary source
+- Attack attempts arrived constantly with no breaks throughout the night
 - NT AUTHORITY\SYSTEM events (4624, 4672) are normal Windows background activity — not attacker traffic
 - Real attacker events are always identified by an external IP address paired with event ID 4625
 
-The takeaway is not that Russia is uniquely dangerous. It is that any machine with an open port and a public IP is a target, constantly, from everywhere, regardless of whether anyone knows it exists.
+The takeaway is not that any one country is uniquely dangerous. It is that any machine with an open port and a public IP is a target, constantly, from everywhere, regardless of whether anyone knows it exists.
 
 ---
 
